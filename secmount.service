@@ -1,0 +1,15 @@
+[Unit]
+Description=Mounts the encrypted partition
+After=tpm2-abrmd.service
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=forking
+KillMode=process
+ExecStart=/secmount/mount.sh
+ExecStop=/secmount/unmount.sh
+Type=oneshot
+RemainAfterExit=yes
+User=root
