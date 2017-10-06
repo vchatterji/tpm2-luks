@@ -127,8 +127,11 @@ sudo ldconfig
 
 Next, you can take ownership of the TPM module:
 ```
-tpm2_takeownership -c -l some_password
+tpm2_takeownership -c
+tpm2_takeownership -L some_password
 ```
+
+You may get an error after `tpm2_takeownership -L some_password`, but you can verify that ownership has indeed been taken by trying `tpm2_takeownership -c` again which should now return an error.
 
 ## Configuration changes
 
@@ -199,7 +202,7 @@ Ideally, we would like for this partition to be auto-mounted on boot so that we 
 
 Then, if the system is tampered with, the mounting of this partition will fail (due to changed PCRs) and data/IP will not be compromised.
 
-First, we want to ensure that /secure (where we mounted the partition) is accessible for both the current account (here `account`) and a special account we create to be able to run systemd services from this partition.
+First, we want to ensure that `/secure` (where we mounted the partition) is accessible for both your current account (here `account`) and a special account we create to be able to run systemd services from this partition.
 
 For this purpose, we first create a group called `secure`:
 ```
@@ -266,3 +269,59 @@ When stopped, the directory `/secure` will be empty. Then start it back up again
 sudo service secmount start
 ```
 Now the directory will have your file.
+
+## Caution
+
+Please use the work presented here responsibly and **AT YOUR OWN RISK**. Its purpose is mainly to serve as an introduction to TPM 2.0 and LUKS. 
+
+This method is tested using Ubuntu version:
+```
+> lsb_release -a
+No LSB modules are available.
+Distributor ID:	Ubuntu
+Description:	Ubuntu 16.04.3 LTS
+Release:	16.04
+Codename:	xenial
+
+```
+and on Intel NUC6i7KYK. 
+
+### **IF YOUR SETUP IS DIFFERENT, THE STEPS MAY NOT WORK AS DESCRIBED HERE.**
+
+It is also advisiable to maintain a copy of the passphrase on some secure medium so that you can change the passphrase in case the PCRs change (Linux GRUB update might change them for example).
+
+I have an encrypted home folder. While setting up Ubuntu, if you chose this option, then you can store the passphrase in your home folder.
+
+```
+cd ~
+sudo cryptfs-tpm2 unseal passphrase -P auto -o passphrase
+```
+
+Now you should have a copy of the passphrase in your home directory. If the PCRs change, you can change the passphrase by supplying the old passphrase saved in your encrypted home directory.
+
+## License
+
+```
+MIT License
+
+Copyright (c) 2017 Varun Chatterji
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
