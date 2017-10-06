@@ -270,6 +270,26 @@ sudo service secmount start
 ```
 Now the directory will have your file.
 
+## Moving PostgreSQL 9.6 to the secure partition
+
+If you have PostgreSQL installed, the following snippet can help you move it to the secure partition. A similar technique may be applied to MySQL or any other database. You may change the snippet below as per your needs
+```
+# Move postgresql database
+sudo systemctl stop postgresql
+sudo rsync -av /var/lib/postgresql /secure
+sudo mv /var/lib/postgresql/9.6/main /var/lib/postgresql/9.6/main.bak
+sudo sed -i "s/data_directory = '\/var\/lib\/postgresql\/9.6\/main'/data_directory = '\/secure\/postgresql\/9.6\/main'/" /etc/postgresql/9.6/main/postgresql.conf
+sudo sed -i "s/\[Unit\]/\[Unit\]\nAfter=secmount.service/" /lib/systemd/system/postgresql.service
+sudo sed -i "s/\[Unit\]/\[Unit\]\nAfter=secmount.service/" /lib/systemd/system/postgresql@.service
+sudo systemctl daemon-reload
+sudo systemctl start postgresql
+```
+
+After verifying that it is working (even after a reboot), you can delete the backup folder:
+```
+sudo rm -rf /var/lib/postgresql/9.6/main.bak
+```
+
 ## Caution
 
 Please use the work presented here responsibly and **AT YOUR OWN RISK**. Its purpose is mainly to serve as an introduction to TPM 2.0 and LUKS. 
