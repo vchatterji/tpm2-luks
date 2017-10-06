@@ -130,9 +130,42 @@ Next, you can take ownership of the TPM module:
 tpm2_takeownership -c -l some_password
 ```
 
+## Configuration changes
+
+With the default configuration of GRUB, a user can enter recovery mode and be root at the shell. We want to disable this option.
+
+Let's edit the GRUB configuration file. Type the following to open the file:
+```
+sudo gedit /etc/default/grub
+```
+Change the commented line from:
+```
+#GRUB_DISABLE_RECOVERY="true"
+```
+to
+```
+GRUB_DISABLE_RECOVERY="true"
+```
+
+Then:
+```
+sudo update-grub
+```
+
+Also, it might be advisable to disable the guest account. To do so, create a file `/etc/lightdm/lightdm.conf.d/50-no-guest.conf` by typing `sudo gedit /etc/lightdm/lightdm.conf.d/50-no-guest.conf`. Then put the following contents in the file and save.
+
+```
+[SeatDefaults]
+allow-guest=false
+```
+
+One more step which I would recommend is setting up a password for your BIOS.
+
+**As these steps can affect the PCR values, it is advisable you complete them before the next step.**
+
 ## LUKS
 
-For this section, it is assumed that you have an Ext4 partition that is not currently mounted. Here, the name of the partition is `/dev/sda4`. If the partition is mounted, first un mount it:
+For this section, it is assumed that you have an Ext4 partition that is not currently mounted. Here, the name of the partition is `/dev/sda4`. If the partition is mounted, first unmount it:
 ```
 sudo umount /dev/sda4
 ```
@@ -178,6 +211,8 @@ sudo usermod -a -G secure account
 sudo chown account:secure /secure
 # Allow members of secure group to read/write/execute from /secure
 sudo chmod -R g+rwx /secure
+# Allow no other users to access /secure
+sudo chmod -R o-rww /secure
 # Add a system account to run systemd services from /secure
 sudo useradd --system secservice
 # Add the user to the secure group
