@@ -61,7 +61,7 @@ Following that, after uncompressing the file, you can execute the following step
 
 ### Adding user:
 ```
-sudo useradd --system --user-group ts
+sudo useradd --system --user-group tss
 ```
 
 ### Build:
