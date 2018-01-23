@@ -80,7 +80,7 @@ sudo pkill -HUP dbus-daemon
 sudo systemctl daemon-reload
 sudo ldconfig
 sudo systemctl enable tpm2-abrmd
-sudo service start tpm2-abrmd
+sudo service tpm2-abrmd start
 ```
 
 
